@@ -350,7 +350,8 @@ function showEndScreen(totalTime) {
     screenEnd.classList.add('active');
     document.getElementById('final-name').textContent = `${studentUp} - ${studentName}`;
     document.getElementById('final-time').textContent = totalTime;
-    document.getElementById('final-score').textContent = `${score} / ${questions.length}`;
+    
+    // NOTA: Se ha ocultado el puntaje de la pantalla final
     
     if (cheatCount > 0) {
         document.getElementById('cheat-stat').style.display = 'flex';
@@ -372,23 +373,23 @@ btnDownload.addEventListener('click', () => {
         <p><strong>Alumno:</strong> ${studentName}</p>
         <p><strong>UP / Legajo:</strong> ${studentUp}</p>
         <p><strong>Tiempo de Resolución:</strong> ${timeDisplay.textContent}</p>
-        <p><strong>PUNTAJE OBTENIDO:</strong> <span style="color:#2563eb; font-weight:bold; font-size:1.2rem;">${score} / ${questions.length}</span></p>
+        <p style="color: #4b5563; font-style: italic; margin-top: 15px;">* Su examen ha sido enviado exitosamente al sistema. Las calificaciones finales serán informadas por el profesor titular.</p>
     `;
     
     if (cheatCount > 0) {
-        htmlContent += `<p style="color: #ef4444; font-weight: bold;">⚠️ Infracciones registradas (Anti-Trampas): ${cheatCount}</p>`;
+        htmlContent += `<p style="color: #ef4444; font-weight: bold; background-color: #fee2e2; padding: 10px; border-radius: 5px;">⚠️ Infracciones registradas (Anti-Trampas): ${cheatCount}</p>`;
     }
     
     htmlContent += `
         <hr style="margin: 20px 0; border: 1px solid #e5e7eb;">
-        <h2>TUS RESPUESTAS:</h2>
+        <h2>TUS RESPUESTAS ELEGIDAS:</h2>
     `;
     
     userAnswers.forEach((ans, index) => {
         htmlContent += `
-            <div style="margin-bottom: 15px; padding: 10px; background: #f9fafb; border-radius: 6px; border-left: 4px solid ${ans.es_correcta === "SÍ" ? '#10b981' : '#ef4444'}; page-break-inside: avoid;">
-                <p style="margin:0 0 5px 0;"><strong>Pregunta ${index + 1}:</strong> ${ans.es_correcta === "SÍ" ? '✅ Correcta' : '❌ Incorrecta'}</p>
-                <p style="margin:0; font-size: 0.9rem;">> Elegiste: ${ans.respuesta_alumno}</p>
+            <div style="margin-bottom: 15px; padding: 10px; background: #f9fafb; border-radius: 6px; border-left: 4px solid #9ca3af; page-break-inside: avoid;">
+                <p style="margin:0 0 5px 0; font-weight: bold;">Pregunta ${index + 1}</p>
+                <p style="margin:0; font-size: 0.95rem;">> Elegiste: ${ans.respuesta_alumno}</p>
             </div>
         `;
     });

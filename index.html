@@ -78,22 +78,19 @@
                 <h1>Examen Finalizado</h1>
                 <p>Tus respuestas han sido enviadas y registradas correctamente en el sistema.</p>
                 
-                <div class="results-summary">
+                <div class="stats-grid">
                     <div class="stat">
                         <span class="stat-label">Alumno:</span>
                         <span class="stat-value" id="final-name"></span>
                     </div>
-                    <div class="stat score-stat">
-                        <span class="stat-label">Puntaje Automático:</span>
-                        <span class="stat-value" id="final-score">0 / 5</span>
-                    </div>
                     <div class="stat">
-                        <span class="stat-label">Tiempo Total:</span>
-                        <span class="stat-value" id="final-time">00:00</span>
+                        <span class="stat-label">Tiempo total:</span>
+                        <span class="stat-value" id="final-time"></span>
                     </div>
+                    <!-- Nota oculta intencionalmente para evitar que se pasen las respuestas -->
                     <div class="stat warning-stat" id="cheat-stat" style="display: none;">
-                        <span class="stat-label">Infracciones (alertas):</span>
-                        <span class="stat-value" id="final-cheats">0</span>
+                        <span class="stat-label">Infracciones (cambio ventana):</span>
+                        <span class="stat-value" id="final-cheats"></span>
                     </div>
                 </div>
 
