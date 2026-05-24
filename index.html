@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Evaluación Oficial - Nutrición Clínica</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container"></div>
+
+    <div id="app">
+        <!-- PANTALLA DE INICIO -->
+        <div id="start-screen" class="screen active">
+            <div class="card">
+                <h1>Evaluación Oficial<br>Nutrición Clínica</h1>
+                <p>Por favor, busca tu Apellido, Nombre o Legajo en la lista para comenzar.</p>
+                
+                <div class="input-group">
+                    <input type="text" id="student-name" list="student-list" placeholder="Toca aquí para buscar..." autocomplete="off">
+                    <datalist id="student-list"></datalist>
+                </div>
+                
+                <button id="btn-start" class="btn primary">Comenzar Examen</button>
+                
+                <div class="warning-text">
+                    ⚠️ <strong>Importante:</strong><br>
+                    - Selecciona EXCLUSIVAMENTE tu nombre de la lista.<br>
+                    - El sistema registra automáticamente CADA VEZ que cambias de aplicación, minimizas el navegador o bloqueas la pantalla.<br>
+                    - Asegúrate de tener buena conexión antes de iniciar.
+                </div>
+            </div>
+        </div>
+
+        <!-- PANTALLA DE CUESTIONARIO -->
+        <div id="quiz-screen" class="screen">
+            <div class="top-bar">
+                <div class="student-info">👤 <span id="display-name"></span></div>
+                <div class="timer">⏱️ <span id="time-display">00:00</span></div>
+            </div>
+            
+            <div class="progress-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+            <div class="progress-text" id="progress-text">Pregunta 1 de X</div>
+
+            <div class="card quiz-card">
+                <div class="question-container">
+                    <h2 id="question-text">Cargando pregunta...</h2>
+                    <div class="question-image-container" id="image-container" style="display: none;">
+                        <img id="question-image" src="" alt="Imagen adjunta">
+                    </div>
+                </div>
+                
+                <div class="answer-container" id="answer-container"></div>
+
+                <div class="actions">
+                    <button id="btn-next" class="btn primary" disabled>Siguiente Pregunta ➡</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- PANTALLA FINAL -->
+        <div id="end-screen" class="screen">
+            <div class="card">
+                <div class="success-icon">✅</div>
+                <h1>Examen Finalizado</h1>
+                <p>Tus respuestas han sido enviadas y registradas correctamente en el sistema.</p>
+                
+                <div class="results-summary">
+                    <div class="stat">
+                        <span class="stat-label">Alumno:</span>
+                        <span class="stat-value" id="final-name"></span>
+                    </div>
+                    <div class="stat score-stat">
+                        <span class="stat-label">Puntaje Automático:</span>
+                        <span class="stat-value" id="final-score">0 / 5</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">Tiempo Total:</span>
+                        <span class="stat-value" id="final-time">00:00</span>
+                    </div>
+                    <div class="stat warning-stat" id="cheat-stat" style="display: none;">
+                        <span class="stat-label">Infracciones (alertas):</span>
+                        <span class="stat-value" id="final-cheats">0</span>
+                    </div>
+                </div>
+
+                <button id="btn-download" class="btn primary" style="background-color: var(--secondary-color); margin-bottom: 20px;">📥 Descargar Comprobante PDF/TXT</button>
+                <p class="closing-text">Ya puedes cerrar esta ventana con seguridad.</p>
+
+                <!-- Feedback (Opcional, si quieres que lo vean al final) -->
+                <div class="feedback-container" id="feedback-container" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PANTALLA DE CARGA -->
+    <div id="loading-overlay" class="overlay">
+        <div class="spinner"></div>
+        <p>Enviando examen al servidor...</p>
+    </div>
+
+    <script src="students.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

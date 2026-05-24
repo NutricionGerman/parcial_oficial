@@ -1,0 +1,54 @@
+function doPost(e) {
+  try {
+    // Obtener la hoja activa
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    
+    // Parsear los datos enviados desde la página web
+    var data = JSON.parse(e.postData.contents);
+    
+    // Crear la fila básica con datos del alumno
+    var rowData = [
+      new Date(),       // Fecha y Hora
+      data.up,          // Columna B: UP
+      data.nombre,      // Columna C: Nombre
+      data.puntaje,     // Columna D: Puntaje (Ej: 4/5)
+      data.tiempo,      // Columna E: Tiempo total
+      data.trampas      // Columna F: Infracciones
+    ];
+    
+    // Agregar las respuestas de opción múltiple a las siguientes columnas
+    // data.respuestas es un array de objetos: {pregunta, respuesta_alumno, es_correcta}
+    if (data.respuestas && Array.isArray(data.respuestas)) {
+      for (var i = 0; i < data.respuestas.length; i++) {
+        var ans = data.respuestas[i];
+        // Formateo visual en Excel: "Respuesta elegida (✅ Correcta / ❌ Incorrecta)"
+        var estado = (ans.es_correcta === "SÍ") ? "✅ Correcta" : "❌ Incorrecta";
+        var textoCelda = ans.respuesta_alumno + "\n[" + estado + "]";
+        rowData.push(textoCelda);
+      }
+    }
+    
+    // Insertar toda la fila en la hoja
+    sheet.appendRow(rowData);
+    
+    // Si es la primera vez que se escriben datos (fila 2), podemos aprovechar de poner los títulos en la fila 1
+    if (sheet.getLastRow() === 2) {
+      var headers = ["Fecha y Hora", "UP / Legajo", "Nombre del Alumno", "Puntaje", "Tiempo", "Infracciones (Trampas)"];
+      for (var j = 1; j <= (data.respuestas ? data.respuestas.length : 0); j++) {
+        headers.push("Pregunta " + j);
+      }
+      sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+      // Dar formato en negrita a los encabezados
+      sheet.getRange(1, 1, 1, headers.length).setFontWeight("bold");
+    }
+    
+    // Retornar éxito (aunque el no-cors del frontend ignore esto, es buena práctica)
+    return ContentService.createTextOutput(JSON.stringify({"result":"success"}))
+      .setMimeType(ContentService.MimeType.JSON);
+      
+  } catch (error) {
+    // Retornar error si algo falla
+    return ContentService.createTextOutput(JSON.stringify({"error": error.message}))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
