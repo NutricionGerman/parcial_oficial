@@ -54,6 +54,23 @@ const questions = [
 // REEMPLAZAR EL URL CUANDO TENGAS EL NUEVO SCRIPT DESPLEGADO
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyTWeBK9N2Ad3pkIKvG4W5xlOVizhdUnRqT_p16deyt_pNDzoKiwqjn5snvAn0ow4oorQ/exec";
 
+// Función para aleatorizar arrays
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+}
+
+// Preparar y aleatorizar preguntas y opciones manteniendo el rastro original
+questions.forEach((q, index) => {
+    q.originalIndex = index; 
+    const correctText = q.options[q.correctAnswer];
+    shuffleArray(q.options); 
+    q.correctAnswer = q.options.indexOf(correctText); 
+});
+shuffleArray(questions);
+
 let currentQuestionIndex = 0;
 let studentName = "";
 let studentUp = "";
@@ -113,6 +130,22 @@ if (typeof studentsData !== 'undefined') {
 
 // Iniciar Cuestionario
 btnStart.addEventListener('click', () => {
+    // Bloqueo de dispositivo (Anti-doble ingreso)
+    if (localStorage.getItem('parcial_oficial_iniciado')) {
+        const bypassCode = prompt("⛔ ACCESO DENEGADO: Ya has iniciado un examen en este dispositivo.\n\nSi tuviste un problema y necesitas un segundo intento, solicita el código de desbloqueo al profesor e ingrésalo aquí:");
+        
+        if (bypassCode === "333") {
+            // El profesor ingresó el código correcto, limpiamos el bloqueo
+            localStorage.removeItem('parcial_oficial_iniciado');
+            alert("Código aceptado. Puedes comenzar de nuevo.");
+        } else {
+            if (bypassCode !== null) { // Si escribió algo pero está mal
+                alert("Código incorrecto.");
+            }
+            return; // Detener ejecución
+        }
+    }
+
     if (isManualEntry) {
         const upVal = manualUp.value.trim();
         const nameVal = manualName.value.trim();
@@ -134,6 +167,9 @@ btnStart.addEventListener('click', () => {
     }
 
     document.getElementById('display-name').textContent = `${studentUp} - ${studentName}`;
+    
+    // Marcar el dispositivo como utilizado
+    localStorage.setItem('parcial_oficial_iniciado', 'true');
     
     screenStart.classList.remove('active');
     screenQuiz.classList.add('active');
@@ -198,6 +234,7 @@ btnNext.addEventListener('click', () => {
 
     // Guardar para Excel
     userAnswers.push({
+        originalIndex: currentQuestion.originalIndex,
         pregunta: currentQuestion.question,
         respuesta_alumno: currentQuestion.options[selectedOption],
         es_correcta: isCorrect ? "SÍ" : "NO"
@@ -276,6 +313,9 @@ async function finishQuiz() {
     document.getElementById('progress-bar').style.width = "100%";
     screenQuiz.classList.remove('active');
     overlay.classList.add('active');
+
+    // Ordenar las respuestas según el índice original para no mezclar las columnas del Excel
+    userAnswers.sort((a, b) => a.originalIndex - b.originalIndex);
 
     const payload = {
         up: studentUp,
