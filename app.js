@@ -78,6 +78,30 @@ const inputName = document.getElementById('student-name');
 const datalist = document.getElementById('student-list');
 const timeDisplay = document.getElementById('time-display');
 
+// Elementos para el registro manual
+const linkManual = document.getElementById('link-manual-entry');
+const linkSearch = document.getElementById('link-search-entry');
+const groupSearch = document.getElementById('search-group');
+const groupManual = document.getElementById('manual-group');
+const manualUp = document.getElementById('manual-up');
+const manualName = document.getElementById('manual-name');
+
+let isManualEntry = false;
+
+linkManual.addEventListener('click', (e) => {
+    e.preventDefault();
+    isManualEntry = true;
+    groupSearch.style.display = 'none';
+    groupManual.style.display = 'block';
+});
+
+linkSearch.addEventListener('click', (e) => {
+    e.preventDefault();
+    isManualEntry = false;
+    groupManual.style.display = 'none';
+    groupSearch.style.display = 'block';
+});
+
 // Población del datalist
 if (typeof studentsData !== 'undefined') {
     studentsData.forEach(student => {
@@ -89,15 +113,25 @@ if (typeof studentsData !== 'undefined') {
 
 // Iniciar Cuestionario
 btnStart.addEventListener('click', () => {
-    const nameInputVal = inputName.value.trim();
-    if (!nameInputVal || !nameInputVal.includes(" - ")) {
-        alert("Por favor, selecciona obligatoriamente tu nombre desde la lista desplegable.");
-        return;
+    if (isManualEntry) {
+        const upVal = manualUp.value.trim();
+        const nameVal = manualName.value.trim();
+        if (!upVal || !nameVal) {
+            alert("Por favor, completa ambos campos (UP y Nombre).");
+            return;
+        }
+        studentUp = upVal;
+        studentName = nameVal;
+    } else {
+        const nameInputVal = inputName.value.trim();
+        if (!nameInputVal || !nameInputVal.includes(" - ")) {
+            alert("Por favor, selecciona obligatoriamente tu nombre desde la lista desplegable.");
+            return;
+        }
+        const parts = nameInputVal.split(" - ");
+        studentUp = parts[0];
+        studentName = parts[1];
     }
-
-    const parts = nameInputVal.split(" - ");
-    studentUp = parts[0];
-    studentName = parts[1];
 
     document.getElementById('display-name').textContent = `${studentUp} - ${studentName}`;
     
@@ -208,19 +242,30 @@ function showToast(message) {
     }, 4000);
 }
 
+let isCheatingRecently = false;
+
 document.addEventListener("visibilitychange", () => {
-    if (document.hidden && isQuizActive) {
-        cheatCount++;
-        showToast(`¡ADVERTENCIA! Haz cambiado de aplicación o pantalla. Infracción #${cheatCount} registrada.`);
+    if (document.hidden && isQuizActive && !isCheatingRecently) {
+        registerCheat("Has cambiado de aplicación o pantalla");
     }
 });
 
 window.addEventListener('blur', () => {
-    if (isQuizActive) {
-        cheatCount++;
-        showToast(`¡ADVERTENCIA! Haz perdido el foco de la ventana. Infracción #${cheatCount} registrada.`);
+    if (isQuizActive && !isCheatingRecently) {
+        registerCheat("Has perdido el foco de la ventana");
     }
 });
+
+function registerCheat(reason) {
+    cheatCount++;
+    isCheatingRecently = true;
+    showToast(`¡ADVERTENCIA! ${reason}. Infracción #${cheatCount} registrada.`);
+    
+    // Bloquear el doble registro por 2 segundos
+    setTimeout(() => {
+        isCheatingRecently = false;
+    }, 2000);
+}
 // ----------------------------------------------------
 
 async function finishQuiz() {
@@ -273,36 +318,57 @@ function showEndScreen(totalTime) {
     }
 }
 
-// Descarga de comprobante
+// Descarga de comprobante en PDF
 btnDownload.addEventListener('click', () => {
-    let content = `=======================================\n`;
-    content += `      COMPROBANTE DE PARCIAL OFICIAL   \n`;
-    content += `=======================================\n\n`;
-    content += `Fecha y Hora: ${new Date().toLocaleString()}\n`;
-    content += `Alumno: ${studentName}\n`;
-    content += `UP / Legajo: ${studentUp}\n`;
-    content += `Tiempo de Resolución: ${timeDisplay.textContent}\n`;
-    content += `PUNTAJE OBTENIDO: ${score} / ${questions.length}\n`;
+    // Crear contenedor HTML invisible para el PDF
+    const pdfDiv = document.createElement('div');
+    pdfDiv.style.padding = '30px';
+    pdfDiv.style.fontFamily = 'Helvetica, Arial, sans-serif';
+    pdfDiv.style.color = '#1f2937';
+    
+    let htmlContent = `
+        <h1 style="color: #2563eb; border-bottom: 2px solid #2563eb; padding-bottom: 10px;">Comprobante de Parcial Oficial</h1>
+        <p><strong>Fecha y Hora:</strong> ${new Date().toLocaleString()}</p>
+        <p><strong>Alumno:</strong> ${studentName}</p>
+        <p><strong>UP / Legajo:</strong> ${studentUp}</p>
+        <p><strong>Tiempo de Resolución:</strong> ${timeDisplay.textContent}</p>
+        <p><strong>PUNTAJE OBTENIDO:</strong> <span style="color:#2563eb; font-weight:bold; font-size:1.2rem;">${score} / ${questions.length}</span></p>
+    `;
     
     if (cheatCount > 0) {
-        content += `Infracciones registradas (Anti-Trampas): ${cheatCount}\n`;
+        htmlContent += `<p style="color: #ef4444; font-weight: bold;">⚠️ Infracciones registradas (Anti-Trampas): ${cheatCount}</p>`;
     }
-    content += `=======================================\n\n`;
-    content += `TUS RESPUESTAS:\n\n`;
+    
+    htmlContent += `
+        <hr style="margin: 20px 0; border: 1px solid #e5e7eb;">
+        <h2>TUS RESPUESTAS:</h2>
+    `;
     
     userAnswers.forEach((ans, index) => {
-        content += `Pregunta ${index + 1}: ${ans.es_correcta === "SÍ" ? '✅ Correcta' : '❌ Incorrecta'}\n`;
-        content += `   > Elegiste: ${ans.respuesta_alumno}\n\n`;
+        htmlContent += `
+            <div style="margin-bottom: 15px; padding: 10px; background: #f9fafb; border-radius: 6px; border-left: 4px solid ${ans.es_correcta === "SÍ" ? '#10b981' : '#ef4444'}; page-break-inside: avoid;">
+                <p style="margin:0 0 5px 0;"><strong>Pregunta ${index + 1}:</strong> ${ans.es_correcta === "SÍ" ? '✅ Correcta' : '❌ Incorrecta'}</p>
+                <p style="margin:0; font-size: 0.9rem;">> Elegiste: ${ans.respuesta_alumno}</p>
+            </div>
+        `;
     });
-
-    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
     
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `Parcial_${studentUp}_${studentName.replace(/ /g, '_')}.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    pdfDiv.innerHTML = htmlContent;
+    
+    const opt = {
+      margin:       10,
+      filename:     `Parcial_${studentUp}_${studentName.replace(/ /g, '_')}.pdf`,
+      image:        { type: 'jpeg', quality: 0.98 },
+      html2canvas:  { scale: 2 },
+      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+    
+    // Cambiar botón temporalmente
+    btnDownload.textContent = "⏳ Generando PDF...";
+    btnDownload.disabled = true;
+    
+    html2pdf().set(opt).from(pdfDiv).save().then(() => {
+        btnDownload.textContent = "📥 Descargar Comprobante PDF/TXT";
+        btnDownload.disabled = false;
+    });
 });

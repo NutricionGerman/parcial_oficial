@@ -6,6 +6,7 @@
     <title>Evaluación Oficial - Nutrición Clínica</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
 
@@ -19,9 +20,16 @@
                 <h1>Evaluación Oficial<br>Nutrición Clínica</h1>
                 <p>Por favor, busca tu Apellido, Nombre o Legajo en la lista para comenzar.</p>
                 
-                <div class="input-group">
+                <div class="input-group" id="search-group">
                     <input type="text" id="student-name" list="student-list" placeholder="Toca aquí para buscar..." autocomplete="off">
                     <datalist id="student-list"></datalist>
+                    <a href="#" id="link-manual-entry" style="display: block; margin-top: 12px; color: var(--primary-color); font-size: 0.95rem; text-decoration: underline;">¿No encuentras tu nombre en la lista? Toca aquí.</a>
+                </div>
+
+                <div class="input-group" id="manual-group" style="display: none; text-align: left;">
+                    <input type="text" id="manual-up" placeholder="Ingresa tu UP o DNI" autocomplete="off" style="margin-bottom: 12px;">
+                    <input type="text" id="manual-name" placeholder="Ingresa tu Apellido y Nombre" autocomplete="off">
+                    <a href="#" id="link-search-entry" style="display: block; margin-top: 12px; color: var(--text-muted); font-size: 0.95rem; text-decoration: underline; text-align: center;">Volver a buscar en la lista oficial</a>
                 </div>
                 
                 <button id="btn-start" class="btn primary">Comenzar Examen</button>
